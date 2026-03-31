@@ -66,3 +66,33 @@ exports.getUserByUserName = async(userName)=>{
     const user = await userRepo.findUserByName(userName)
     return user ;
 }
+exports.forgotPassword = async(email)=>{
+    const user = await repo.findByEmail(email);
+    if(!user){
+        throw new Error("no user found on this email");
+    }
+    const token = generateResetToken(user)
+    const resetLink = `http://localhost:8080/reset-password/${token}`
+    await sendEmail(
+        user.email,
+        "Reset your password",
+          `<h3>Click below to reset password</h3>
+     <a href="${resetLink}">Reset Password</a>`
+    )
+    return {message : "reset email sent"}
+}
+exports.resetPassword = async(token, newPassword)=>{
+    let checkToken ;
+    try {
+        checkToken = verifyResetToken(token);
+    }catch(error){
+        throw new Error("invalid or expired token");
+    }
+    const user = await repo.findById(checkToken.id)
+    if(!user){
+        throw new Error("user not found");
+    }
+    const hashedPassword = await bcrypt.hash(newPassword,10);
+    await repo.updatePassword(user, hashedPassword);
+    return {message: "password reset successfully"};
+}

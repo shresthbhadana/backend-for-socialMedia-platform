@@ -1,17 +1,27 @@
 const Post = require("../models/postmodel");
 
-
 exports.findPostById = async (id) => {
-  return await Post.findById(id).populate("user", "name userName"); 
+  return await Post.findById(id).populate("user", "name userName");
+};
+
+exports.findAllPosts = async () => {
+  return await Post.find().populate("user", "name userName");
 };
 
 exports.createPost = async (postData) => {
   return await Post.create(postData);
 };
 
- 
-exports.updatePostService = async (postId, updateData) => {
-  const post = await postRepo.findPostById(postId);
+exports.savePost = async (post) => {
+  return await post.save();
+};
+
+exports.removePost = async (post) => {
+  return await post.remove();
+};
+
+exports.updatePost = async (postId, updateData) => {
+  const post = await exports.findPostById(postId);
   if (!post) throw new Error("Post not found");
 
   const { body, media } = updateData;
@@ -23,16 +33,30 @@ exports.updatePostService = async (postId, updateData) => {
   if (body) post.body = body;
   if (media) post.media = media;
 
-  const updatedPost = await postRepo.savePost(post);
-  return updatedPost;
+  return await exports.savePost(post);
 };
 
-
-exports.deletePostService = async (postId) => {
-  const post = await postRepo.findPostById(postId);
+exports.deletePost = async (postId) => {
+  const post = await exports.findPostById(postId);
   if (!post) throw new Error("Post not found");
-
-  await postRepo.removePost(post);
+  await exports.removePost(post);
   return true;
 };
+
+exports.likePost = async (postId) => {
+  const post = await exports.findPostById(postId);
+  if (!post) throw new Error("Post not found");
+
+  post.likes += 1;
+  return await exports.savePost(post);
+};
+
+exports.commentPost = async (postId, comment) => {
+  const post = await exports.findPostById(postId);
+  if (!post) throw new Error("Post not found");
+
+  post.comments.push(comment);
+  return await exports.savePost(post);
+};
+
 

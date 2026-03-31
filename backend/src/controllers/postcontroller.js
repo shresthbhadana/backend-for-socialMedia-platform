@@ -1,5 +1,14 @@
-const Post  = require('../models/postmodel.js')
-const postService = require("../services/postService.js")
+const postService = require("../services/postService.js");
+
+exports.getAllPostsController = async (req, res) => {
+  try {
+    const posts = await postService.getAllPosts();
+    return res.status(200).json({ posts });
+  } catch (error) {
+    console.error("getAllPostsController error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 exports.getPostController = async (req, res) => {
   try {
@@ -115,9 +124,9 @@ exports.deleteCommentController = async (req, res) => {
   try {
     const { id: postId, commentId } = req.params;
 
-    const updatedPost = await deleteCommentService(postId, commentId);
+    const updatedPost = await postService.deleteCommentService(postId, commentId);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Comment deleted successfully",
       comments: updatedPost.comments
     });
@@ -125,7 +134,7 @@ exports.deleteCommentController = async (req, res) => {
     if (error.message === "Post not found") {
       return res.status(404).json({ message: error.message });
     }
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -133,9 +142,9 @@ exports.getCommentController = async (req, res) => {
   try {
     const { id: postId, commentId } = req.params;
 
-    const comment = await getCommentService(postId, commentId);
+    const comment = await postService.getCommentService(postId, commentId);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Comment received successfully",
       comment
     });
@@ -143,9 +152,54 @@ exports.getCommentController = async (req, res) => {
     if (error.message === "Post not found" || error.message === "Comment not found") {
       return res.status(404).json({ message: error.message });
     }
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.likePost =async(req, res)=> {
+    try{
+  const userId = req.user.id;
+  const username = req.user.username;
+  const postId = req.params.postId;
+  const io = req.app.get("io");
+
+  const post = await postService.likePost(postId, userId, username, io);
+  res.json({ message: "Post liked and notification sent", post });
+  logger.info("post liked and notification sent")
+
+
+}catch(error){
+    logger.error(new Error("500 internal server error"))
+}
+
+}
+
+ exports.commentPost = async(req, res)=> {
+    try{
+  const userId = req.user.id;
+  const username = req.user.username;
+  const postId = req.params.postId;
+  const text = req.body.text;
+  const io = req.app.get("io");
+
+  const comment = await postService.commentPost(postId, userId, username, text, io);
+  res.json({ message: "Comment added and notification sent", comment });
+  logger.info("comment added and notificatiion send successfully")
+}catch(error){
+     logger.error(new Error("500 internal server error"))
+}
+
+}
+exports.replyToComment = async (req, res) => {
+    const { postId, commentId } = req.params;
+    const { text } = req.body;
+    const { id: userId, username } = req.user;
+    const io = req.app.get("io");
+
+    const post = await postService.replyToComment(postId, commentId, userId, username, text, io);
+    res.json(post);
+};
+
 
 
 

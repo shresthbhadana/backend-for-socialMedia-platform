@@ -3,6 +3,7 @@ const router = express.Router();
 const { upload } = require('../utils/cloudinary.js');
 
 const {
+  getAllPostsController,
   getPostController,
   createPostController,
   updatePostController,
@@ -245,9 +246,10 @@ const { createPostSchema, updatePostSchema, commentSchema } = require("../valida
  */
 router.post("/create", upload.single('media'), validate(createPostSchema), createPostController);
 
-router.get("/", getPostController);
+router.get("/", getAllPostsController);
+router.get("/:id", getPostController);
 
-router.put("/:id",validate(updatePostSchema), updatePostController);
+router.put("/:id", validate(updatePostSchema), updatePostController);
 
 
 router.delete("/:id", deletePostController);
@@ -260,9 +262,9 @@ router.post("/:id/like", likePostController);
 router.post("/:id/comment",validate(commentSchema),addCommentController);
 
 
-router.delete("/:id/comments/:Id", deleteCommentController);
+router.delete("/:id/comments/:commentId", deleteCommentController);
 
-router.get("/:id/comments", getCommentController);
+router.get("/:id/comments/:commentId", getCommentController);
 
 module.exports = router;
 

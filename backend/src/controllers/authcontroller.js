@@ -58,5 +58,24 @@ exports.getMe = async (req, res) => {
     });
   }
 };
+ exports.forgotPassword = async (req, res, next) => {
+   try {
+     const data = await service.forgotPassword(req.body.email);
+        res.json(data);
+   } catch (err) {
+    next(err);
+   }
+ };
  
+ exports.resetPassword = async (req, res, next) => {
+   try {
+     const data = await service.resetPassword(
+       req.body.token,
+       req.body.newPassword
+     );
+     res.json(data);
+   } catch (err) {
+    next(err);
+   }
+ };
  
