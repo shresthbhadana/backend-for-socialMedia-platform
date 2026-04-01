@@ -1,5 +1,5 @@
 const cron = require("node-cron");
-const Post = require("../model/postModel");
+const Post = require("../models/postmodel")
 cron.schedule("* * * * *", async () => {
   console.log("Cron running every minute...");
 
