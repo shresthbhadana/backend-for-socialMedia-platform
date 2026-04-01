@@ -3,7 +3,9 @@ const Joi = require("joi");
 
 const createPostSchema = Joi.object({
   body: Joi.string().required(),
-  media: Joi.string().optional()
+  media: Joi.string().optional(),
+  postedAt: Joi.date().iso().optional(),
+  isPosted: Joi.boolean().optional()
 });
 
 

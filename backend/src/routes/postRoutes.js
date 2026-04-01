@@ -37,8 +37,15 @@ const { createPostSchema, updatePostSchema, commentSchema } = require("../valida
  *                 type: string
  *               media:
  *                 type: string
- *               userId : 
- *                type  : string
+ *               userId:
+ *                 type: string
+ *               postedAt:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Optional scheduled publish date/time (if absent, post is published immediately)
+ *               isPosted:
+ *                 type: boolean
+ *                 description: Optional, true if already posted, false for scheduled post
  *     responses:
  *       201:
  *         description: Post created
