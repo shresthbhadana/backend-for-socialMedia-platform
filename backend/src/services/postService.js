@@ -25,10 +25,24 @@ exports.createPostService = async (user, postData) => {
 
   const media = postData.media || "";
 
+  let postedAt;
+  let isPosted;
+
+  if (!postData.postedAt) {
+    
+    postedAt = new Date();
+    isPosted = true;
+  } else {
+    postedAt = new Date(postData.postedAt);
+    isPosted = false;
+  }
+
   const newPost = await postRepo.createPost({
     userId,
     body: bodyText,
     media,
+    postedAt,
+    isPosted
   });
 
   return newPost;
