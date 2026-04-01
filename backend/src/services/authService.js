@@ -1,8 +1,10 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userRepo = require("../repository/userRepo.js");
+const sendEmail = require("../utils/emailService.js");
+const { generateResetToken, verifyResetToken } = require("../utils/token.js");
 
-const JWT_SECRET = "supersecretkey";
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
 exports.registerUser = async ({ name, userName, email, password }) => {
   if (!name || !userName || !email || !password) {
@@ -67,7 +69,7 @@ exports.getUserByUserName = async(userName)=>{
     return user ;
 }
 exports.forgotPassword = async(email)=>{
-    const user = await repo.findByEmail(email);
+    const user = await userRepo.findUserByEmail(email);
     if(!user){
         throw new Error("no user found on this email");
     }
@@ -88,11 +90,12 @@ exports.resetPassword = async(token, newPassword)=>{
     }catch(error){
         throw new Error("invalid or expired token");
     }
-    const user = await repo.findById(checkToken.id)
+    const user = await userRepo.getUserById(checkToken.id)
     if(!user){
         throw new Error("user not found");
     }
     const hashedPassword = await bcrypt.hash(newPassword,10);
-    await repo.updatePassword(user, hashedPassword);
+    user.password = hashedPassword;
+    await userRepo.updateUser(user);
     return {message: "password reset successfully"};
 }
